@@ -96,3 +96,21 @@ dependencies {
     kapt("com.google.dagger:hilt-compiler:2.47")
 }
 ```
+
+* 앱에서 사용할 api key와 jwt 토큰 확보
+  * api 키는 대시보드에서 확보 가능
+  * jwt 토큰 발급 방법(수동으로)
+    * Chat Messaging > Explorer > users > 해당 유저의 id 복사
+    * https://getstream.io/chat/docs/android/tokens_and_authentication/?language=kotlin 문서 참고
+    * 왼쪽에 secret, 오른쪽에 복사한 아이디를 붙여넣으면 jwt 토큰이 발급됨
+
+  * resource string에 두고 사용
+  ```
+  <resources>
+    <string name="app_name">Stream-Chat-Practice</string>
+
+    <string name="api_key">apikey</string>
+    <string name="jwt_token">발급받은토큰</string>
+  </resources>
+  ```
+  

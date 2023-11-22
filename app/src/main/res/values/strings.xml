@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Stream-Chat-Practice</string>
+
+    <string name="api_key">7gpa466bsq58</string>
+    <!--  kkm에 대한 jwt 토큰  -->
+    <string name="jwt_token">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoia2ttIn0.iw-5eXsyfZ5pg0D2RibaQninhJkFndS2su2GqpBE-wo</string>
 </resources>
