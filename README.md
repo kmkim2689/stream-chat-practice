@@ -114,3 +114,160 @@ dependencies {
   </resources>
   ```
   
+## 2. 로그인 구현
+
+### 2.1. 로그인 UI 구현
+* LoginScreen
+```
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun LoginScreen() {
+
+    var username by remember {
+        mutableStateOf(TextFieldValue(""))
+    }
+
+    var showProgressbar: Boolean by remember {
+        mutableStateOf(false)
+    }
+
+    ConstraintLayout(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(start = 35.dp, end = 35.dp)
+    ) {
+        val (
+            logo, usernameTextField, btnLoginAsUser, btnLoginAsGuest, progressBar
+        ) = createRefs()
+
+        Image(
+            modifier = Modifier
+                .size(120.dp)
+                .constrainAs(logo) {
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                    top.linkTo(parent.top, margin = 100.dp)
+                },
+            painter = painterResource(id = R.drawable.ic_chat_logo),
+            contentDescription = "logo"
+        )
+
+        OutlinedTextField(
+            modifier = Modifier
+                .constrainAs(usernameTextField) {
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                    top.linkTo(logo.bottom, margin = 32.dp)
+                },
+            value = username,
+            onValueChange = { newValue ->
+                username = newValue
+            },
+            label = {
+                Text(text = "Enter username")
+            },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
+        )
+
+        Button(
+            onClick = { /*TODO*/ },
+            modifier = Modifier
+                .fillMaxWidth()
+                .constrainAs(btnLoginAsUser) {
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                    top.linkTo(usernameTextField.bottom, margin = 16.dp)
+                }
+        ) {
+            Text(text = "Login As User")
+        }
+
+
+        Button(
+            onClick = { /*TODO*/ },
+            modifier = Modifier
+                .fillMaxWidth()
+                .constrainAs(btnLoginAsGuest) {
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                    top.linkTo(btnLoginAsUser.bottom, margin = 16.dp)
+                }
+        ) {
+            Text(text = "Login As Guest")
+        }
+
+        if (showProgressbar) {
+            CircularProgressIndicator(
+                modifier = Modifier.constrainAs(progressBar) {
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                    top.linkTo(btnLoginAsGuest.bottom, margin = 16.dp)
+                }
+            )
+        }
+
+    }
+}
+```
+
+* Hilt를 사용하기 위한 과정 : Application 파일 커스텀
+```
+@HiltAndroidApp
+class ChatApplication : Application() {
+}
+```
+
+
+* LoginViewModel
+  * Stream Chat Sdk에서는 Chat Client Object를 요구
+  * 생성자에 클라이언트를 받도록 추가한다.
+
+```
+@HiltViewModel
+class LoginViewModel @Inject constructor(
+    private val client: ChatClient
+) : ViewModel() {
+    
+}
+```
+
+### 2.2. Module 구현
+
+* ViewModel에서 사용해야 할 ChatClient 주입 목적
+* StreamOfflinePluginFactory
+  * to provide offline support
+  * basically contains a class offline plugin employing a new caching mechanism powered by the side effects we applied to the chat client functions
+* StreamStatePluginFactory
+* ChatClient
+```
+@Module
+@InstallIn(SingletonComponent::class)
+object AppModule {
+
+    @Provides
+    @Singleton
+    fun provideOfflinePluginFactory(
+        @ApplicationContext context: Context
+    ) = StreamOfflinePluginFactory(context)
+
+    @Provides
+    @Singleton
+    fun provideStreamStatePluginFactory(
+        @ApplicationContext context: Context
+    ) = StreamStatePluginFactory(
+        config = StatePluginConfig(),
+        appContext = context
+    )
+
+    @Provides
+    @Singleton
+    fun provideChatClient(
+        @ApplicationContext context: Context,
+        offlinePluginFactory: StreamOfflinePluginFactory,
+        streamStatePluginFactory: StreamStatePluginFactory
+    ) = ChatClient.Builder(context.getString(R.string.api_key), context)
+        .withPlugins(offlinePluginFactory, streamStatePluginFactory)
+        .logLevel(ChatLogLevel.ALL)
+        .build()
+}
+```

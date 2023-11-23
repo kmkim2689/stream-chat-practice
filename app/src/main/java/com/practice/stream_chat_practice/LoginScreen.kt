@@ -1,5 +1,6 @@
 package com.practice.stream_chat_practice
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,6 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
@@ -26,15 +28,20 @@ import androidx.constraintlayout.compose.ConstraintLayout
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen() {
-
+fun LoginScreen(
+    onLogin: (String, String?) -> Unit,
+    token: String,
+    showProgressbar: Boolean
+) {
     var username by remember {
         mutableStateOf(TextFieldValue(""))
     }
 
-    var showProgressbar: Boolean by remember {
+    Log.i("login loading", showProgressbar.toString())
+
+    /*var showProgressbar: Boolean by remember {
         mutableStateOf(false)
-    }
+    }*/
 
     ConstraintLayout(
         modifier = Modifier
@@ -75,7 +82,9 @@ fun LoginScreen() {
         )
 
         Button(
-            onClick = { /*TODO*/ },
+            onClick = {
+                onLogin(username.text, token)
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .constrainAs(btnLoginAsUser) {
@@ -89,7 +98,9 @@ fun LoginScreen() {
 
 
         Button(
-            onClick = { /*TODO*/ },
+            onClick = {
+                onLogin(username.text, null)
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .constrainAs(btnLoginAsGuest) {
@@ -102,13 +113,21 @@ fun LoginScreen() {
         }
 
         if (showProgressbar) {
-            CircularProgressIndicator(
+            Text(
+                modifier = Modifier.constrainAs(progressBar) {
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                    top.linkTo(btnLoginAsGuest.bottom, margin = 16.dp)
+                },
+                text = "loading"
+            )
+/*            CircularProgressIndicator(
                 modifier = Modifier.constrainAs(progressBar) {
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
                     top.linkTo(btnLoginAsGuest.bottom, margin = 16.dp)
                 }
-            )
+            )*/
         }
 
     }
